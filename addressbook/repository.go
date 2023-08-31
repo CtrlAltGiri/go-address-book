@@ -1,4 +1,4 @@
-package main
+package addressbook
 
 type Repository interface {
 	GetData(index string, directory string) string

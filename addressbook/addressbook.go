@@ -1,4 +1,4 @@
-package main
+package addressbook
 
 import (
 	"os"

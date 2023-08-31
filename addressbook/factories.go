@@ -1,4 +1,4 @@
-package main
+package addressbook
 
 func GetAddressBookInstance(config string) IAddressBook {
 	if config == "test" {

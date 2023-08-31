@@ -1,3 +1,3 @@
-module github.com/CtrlAltGiri/addressbook
+module github.com/CtrlAltGiri/go-address-book
 
 go 1.21.0

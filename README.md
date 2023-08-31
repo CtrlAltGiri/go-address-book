@@ -1,5 +1,5 @@
 ### go-address-book
-Mini address book CLI applications
+Mini address book CLI application
 
 ### Run in Windows
 ```go
