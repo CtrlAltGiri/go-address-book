@@ -3,10 +3,18 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/CtrlAltGiri/go-address-book/addressbook"
 )
+
+func init() {
+	os.MkdirAll(addressbook.INDEXDIR, os.ModePerm)
+	os.MkdirAll(addressbook.FIRSTNAMEINDEXDIR, os.ModePerm)
+	os.MkdirAll(addressbook.PHONEINDEXDIR, os.ModePerm)
+	os.MkdirAll(addressbook.LASTNAMEINDEXDIR, os.ModePerm)
+}
 
 func main() {
 	abInstance := addressbook.GetAddressBookInstance("prod")
@@ -24,10 +32,21 @@ func main() {
 		searchEntity := os.Args[3]
 		var contacts *[]addressbook.Contact = nil
 		if os.Args[2] == addressbook.NAME {
-			contacts = abInstance.SearchName(&searchEntity)
 
+			// Search by full name if it is split by a space
+			if len(strings.Split(searchEntity, " ")) == 2 {
+				contacts = abInstance.SearchContact(&searchEntity, addressbook.FullName)
+			}
+
+			// Search only if results were not found
+			if contacts == nil || len(*contacts) == 0 {
+				contacts = abInstance.SearchContact(&searchEntity, addressbook.FirstName)
+				if len(*contacts) == 0 {
+					contacts = abInstance.SearchContact(&searchEntity, addressbook.LastName)
+				}
+			}
 		} else if os.Args[2] == addressbook.PHONE {
-			contacts = abInstance.SearchPhone(&searchEntity)
+			contacts = abInstance.SearchContact(&searchEntity, addressbook.PhoneNumber)
 		}
 
 		latency = time.Now().Sub(startTime)

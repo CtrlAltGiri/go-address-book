@@ -7,8 +7,7 @@ import (
 
 type IAddressBook interface {
 	AddContact(firstName *string, lastName *string, phoneNumber *string, address *string) bool
-	SearchName(name *string) *[]Contact
-	SearchPhone(phone *string) *[]Contact
+	SearchContact(identity *string, searchEntity SearchEntity) *[]Contact
 }
 
 type AddressBook struct {
@@ -25,16 +24,12 @@ func (a AddressBook) AddContact(firstName *string, lastName *string, phoneNumber
 	return true
 }
 
-func (a AddressBook) SearchName(name *string) *[]Contact {
-	return a.SearchIndex(name, FIRSTNAMEINDEXDIR)
-}
+func (a AddressBook) SearchContact(identity *string, searchEntity SearchEntity) *[]Contact {
+	if searchEntity == FullName {
+		panic("err")
+	}
 
-func (a AddressBook) SearchPhone(phone *string) *[]Contact {
-	return a.SearchIndex(phone, PHONEINDEXDIR)
-}
-
-func (a *AddressBook) SearchLastName(lastName *string) *[]Contact {
-	return a.SearchIndex(lastName, LASTNAMEINDEXDIR)
+	return a.SearchIndex(identity, getSearchEntityFileMap()[searchEntity])
 }
 
 func (a *AddressBook) SearchIndex(valueToSearch *string, directory string) *[]Contact {
@@ -42,7 +37,7 @@ func (a *AddressBook) SearchIndex(valueToSearch *string, directory string) *[]Co
 	values, _ := os.ReadFile(directory + hashToSearch)
 	nameFileMap := strings.Split(string(values), "\n")
 
-	var filesToSearch []string
+	filesToSearch := make(map[string]struct{})
 	for _, nameFile := range nameFileMap {
 		if len(nameFile) == 0 {
 			continue
@@ -50,20 +45,27 @@ func (a *AddressBook) SearchIndex(valueToSearch *string, directory string) *[]Co
 
 		nameFileString := strings.Split(nameFile, SEPARATOR)
 		if strings.ToLower(nameFileString[0]) == strings.ToLower(*valueToSearch) {
-			filesToSearch = append(filesToSearch, nameFileString[1])
+			var exists = struct{}{}
+			_, exist := filesToSearch[nameFileString[1]]
+			if !exist {
+				filesToSearch[nameFileString[1]] = exists
+			}
 		}
 	}
 
-	var contacts []Contact
-	for _, fileToSearch := range filesToSearch {
-		fileBytes, _ := os.ReadFile(BASEDIR + fileToSearch)
+	var contacts []Contact = nil
+	for key, _ := range filesToSearch {
+		fileBytes, _ := os.ReadFile(BASEDIR + key)
 		fileStrings := strings.Split(string(fileBytes), "\n")
 		for _, fileLine := range fileStrings {
 			if len(fileLine) == 0 {
 				continue
 			}
 
-			contacts = append(contacts, *DecodeContact(fileLine))
+			c := *DecodeContact(fileLine)
+			if strings.Contains(fileLine, *valueToSearch) {
+				contacts = append(contacts, c)
+			}
 		}
 	}
 

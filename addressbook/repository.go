@@ -1,6 +1,6 @@
 package addressbook
 
-type Repository interface {
+type TieredCache interface {
 	GetData(index string, directory string) string
 }
 
