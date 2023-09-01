@@ -18,3 +18,24 @@ func DecodeContact(s string) *Contact {
 	c := Contact{FirstName: splits[0], LastName: splits[1], PhoneNumber: splits[2], Address: splits[3]}
 	return &c
 }
+
+func (c *Contact) Equals(value string, searchEntity SearchEntity) bool {
+	if searchEntity == FirstName {
+		return c.FirstName == value
+	}
+
+	if searchEntity == LastName {
+		return c.LastName == value
+	}
+
+	if searchEntity == PhoneNumber {
+		return c.PhoneNumber == value
+	}
+
+	if searchEntity == FullName {
+		return value == (c.FirstName+c.LastName) ||
+			value == (strings.Join([]string{c.FirstName, c.LastName}, " "))
+	}
+
+	return false
+}

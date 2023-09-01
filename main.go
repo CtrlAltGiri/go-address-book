@@ -17,7 +17,8 @@ func init() {
 }
 
 func main() {
-	abInstance := addressbook.GetAddressBookInstance("prod")
+	factory := addressbook.AddressBookFactory{}
+	abInstance := factory.GetAddressBookInstance()
 	startTime := time.Now()
 	latency := time.Now().Sub(startTime)
 
@@ -35,6 +36,7 @@ func main() {
 
 			// Search by full name if it is split by a space
 			if len(strings.Split(searchEntity, " ")) == 2 {
+				searchEntity = strings.Replace(searchEntity, " ", "", 1)
 				contacts = abInstance.SearchContact(&searchEntity, addressbook.FullName)
 			}
 
